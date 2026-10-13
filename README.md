@@ -21,9 +21,10 @@ Open the page through Vite. Browsers block ES modules from `file://`.
 - **Hues** sets one base color per hue. Each hue gets 9 steps: 100 drifts toward white, 900 toward black, and the base sits at 200.
 - **Tokens** pick which hue plays `accent`, `interactive` and `neutral`.
 - **Apply palette to roles** fills every role from the palette. It only runs when you click, so hand edits are not overwritten silently.
-- **Load opencode preset** starts from an opencode-based palette.
+- **Theme** switches between themes kept in the page; **New**, **Rename** and **Delete** manage them. Themes live in memory until you reload the page.
+- **Source** shows the theme JSON. **Reset** restores the built-in dark palette in the current theme.
+- **Export** downloads `<name>.json`.
 - **Import** reads a pi theme JSON; `vars` references are resolved to hex.
-- **Download JSON** writes `<name>.json`, validated before download.
 
 ## Notes
 

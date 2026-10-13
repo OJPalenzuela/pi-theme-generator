@@ -133,22 +133,30 @@ export const GROUPS = [
   ["Bash mode", ["bashMode"]],
 ];
 
-// Palette: 8 hues, each with 9 steps generated from one base at step 200. Tokens pick which hue plays each job.
-export const HUES = ["gray", "red", "orange", "yellow", "green", "cyan", "blue", "purple"];
+// Palette: hues with nine steps each, built from one base at step 200 (gray is built from anchors). Tokens pick which hue plays each job.
+// Defaults are the built-in dark palette: its hues, their bases, and its token picks.
+export const HUES = ["gray", "red", "orange", "green", "cyan", "blue", "purple"];
 export const STEPS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 export const TOKENS = ["accent", "interactive", "neutral"];
+export const NEW_HUE_BASE = "#e5c07b";
 export const DEFAULT_PALETTE = {
   bases: {
-    gray: "#abb2bf",
     red: "#e06c75",
-    orange: "#d19a66",
-    yellow: "#e5c07b",
-    green: "#98c379",
+    orange: "#fab283",
+    green: "#7fd88f",
     cyan: "#56b6c2",
-    blue: "#61afef",
-    purple: "#c678dd",
+    blue: "#5c9cf5",
+    purple: "#9d7cd8",
   },
-  tokens: { accent: "blue", interactive: "purple", neutral: "gray" },
+  tokens: { accent: "orange", interactive: "blue", neutral: "gray" },
+};
+// Gray's steps come from these text and background colors, keyed by step.
+export const GRAY_ANCHORS = {
+  200: "#eeeeee",
+  400: "#808080",
+  600: "#1e1e1e",
+  700: "#141414",
+  800: "#0a0a0a",
 };
 
 // Each role takes one step: "token.step" or "hue.step".
@@ -198,7 +206,7 @@ export const ROLE_REFS = {
   syntaxVariable: "cyan.200",
   syntaxString: "green.200",
   syntaxNumber: "orange.200",
-  syntaxType: "yellow.200",
+  syntaxType: "cyan.100",
   syntaxOperator: "cyan.300",
   syntaxPunctuation: "neutral.300",
   thinkingOff: "neutral.700",
@@ -312,21 +320,31 @@ function hexToOklch(hex) {
   };
 }
 
-function oklchToHex({ L, C, h }) {
+// Linear sRGB channels; a channel outside 0..1 means the color is out of gamut.
+function oklchToLinear({ L, C, h }) {
   const a = C * Math.cos(h);
   const b = C * Math.sin(h);
   const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
   const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
   const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
-  const rgb = [
+  return [
     4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
     -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
     -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
   ];
-  // shortcut: out-of-gamut colors are clipped per channel, not gamut-mapped; upgrade if clipped steps look wrong
+}
+
+const inGamut = (rgb) => rgb.every((v) => v >= -1e-6 && v <= 1 + 1e-6);
+
+// Out-of-gamut colors lose chroma in 10% steps, keeping lightness and hue, until they fit sRGB.
+function oklchToHex(color) {
+  const fits = (C) => inGamut(oklchToLinear({ ...color, C }));
+  const C = fits(color.C)
+    ? color.C
+    : (Array.from({ length: 24 }, (_, i) => color.C * 0.9 ** (i + 1)).find(fits) ?? 0);
   return (
     "#" +
-    rgb
+    oklchToLinear({ ...color, C })
       .map((v) =>
         Math.round(Math.min(1, Math.max(0, toSrgb(v))) * 255)
           .toString(16)
@@ -336,28 +354,90 @@ function oklchToHex({ L, C, h }) {
   );
 }
 
-// Nine steps from one base: 100 drifts toward near-white, 900 toward near-black, and chroma fades toward both ends so light steps do not clip to cyan.
+// Nine steps from one base: lightness moves toward near-black below 200 and chroma fades with distance from 200.
 export function scale(base) {
   const { L, C, h } = hexToOklch(base);
+  const target = Math.min(0.18, L);
   return Object.fromEntries(
     STEPS.map((step) => {
       if (step === 200) return [step, base];
-      const up = step < 200;
-      const f = up ? (200 - step) / 100 : (step - 200) / 700;
-      const target = up ? 0.97 : 0.18;
+      const f = (step - 200) / 700;
       return [step, oklchToHex({ L: L + (target - L) * f, C: C * (1 - 0.5 * f), h })];
     }),
   );
 }
 
+// Blends two colors in OKLCH; hue takes the shorter arc.
+function mix(from, to, f) {
+  const a = hexToOklch(from);
+  const b = hexToOklch(to);
+  const turn = ((((b.h - a.h) % (2 * Math.PI)) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+  return oklchToHex({
+    L: a.L + (b.L - a.L) * f,
+    C: a.C + (b.C - a.C) * f,
+    h: a.h + turn * f,
+  });
+}
+
+// The two anchors a step blends between; steps past either end extrapolate from the outer pair.
+function neighbours(known, step) {
+  if (step < known[0]) return [known[0], known[1]];
+  if (step > known.at(-1)) return [known.at(-2), known.at(-1)];
+  return [known.findLast((k) => k < step), known.find((k) => k > step)];
+}
+
+function grayScale(anchors) {
+  const known = Object.keys(anchors)
+    .map(Number)
+    .sort((x, y) => x - y);
+  return Object.fromEntries(
+    STEPS.map((step) => {
+      if (step in anchors) return [step, anchors[step]];
+      const [lo, hi] = neighbours(known, step);
+      return [step, mix(anchors[lo], anchors[hi], (step - lo) / (hi - lo))];
+    }),
+  );
+}
+
+// Every hue's steps: gray from its anchors, the rest from their bases. Overrides ("hue.step" -> hex) replace single steps.
+export function paletteScales(bases, overrides = {}) {
+  const scales = {
+    gray: grayScale(GRAY_ANCHORS),
+    ...Object.fromEntries(Object.entries(bases).map(([hue, base]) => [hue, scale(base)])),
+  };
+  for (const [ref, hex] of Object.entries(overrides)) {
+    const [hue, step] = ref.split(".");
+    scales[hue][Number(step)] = hex;
+  }
+  return scales;
+}
+
+// A reference is "hue.step" or "token.step"; a token resolves to its hue first.
+export function resolveRef(ref, scales, tokens) {
+  const [name, step] = ref.split(".");
+  const hue = TOKENS.includes(name) ? tokens[name] : name;
+  return scales[hue][Number(step)];
+}
+
+// Every reference a role can pick, hues first, then tokens, each with its resolved color.
+export function refOptions(hues, scales, tokens) {
+  const hueOptions = hues.flatMap((hue) =>
+    STEPS.map((step) => ({ value: `${hue}.${step}`, group: "Hues", color: scales[hue][step] })),
+  );
+  const tokenOptions = TOKENS.flatMap((token) =>
+    STEPS.map((step) => ({
+      value: `${token}.${step}`,
+      group: "Tokens",
+      color: resolveRef(`${token}.${step}`, scales, tokens),
+    })),
+  );
+  return [...hueOptions, ...tokenOptions];
+}
+
 // Resolves every role's reference through the palette into a #rrggbb value.
 export function deriveRoles({ bases, tokens }) {
-  const scales = Object.fromEntries(HUES.map((hue) => [hue, scale(bases[hue])]));
+  const scales = paletteScales(bases);
   return Object.fromEntries(
-    ROLES.map((role) => {
-      const [name, step] = ROLE_REFS[role].split(".");
-      const hue = TOKENS.includes(name) ? tokens[name] : name;
-      return [role, scales[hue][Number(step)]];
-    }),
+    ROLES.map((role) => [role, resolveRef(ROLE_REFS[role], scales, tokens)]),
   );
 }

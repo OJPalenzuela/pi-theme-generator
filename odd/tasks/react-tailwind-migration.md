@@ -6,7 +6,7 @@ Owner: parent session. Verify: independent check after implementation (new depen
 ## Specs
 
 - S1 "Hay que migrar este repo a react y tailwind css en sus ultimas versiones" (latest published versions at migration time).
-- S2 Behavior unchanged: Load opencode preset, Import, Download JSON, Hues + Tokens + "Apply palette to roles", role rows with color picker and hex text, invalid hex marked, status line, preview of the pi roles.
+- S2 Behavior unchanged: Load default preset, Import, Download JSON, Hues + Tokens + "Apply palette to roles", role rows with color picker and hex text, invalid hex marked, status line, preview of the pi roles.
 - S3 `npm test`, `npm run build`, `npm start` (port 8000), `npm run preview` keep working.
 - S4 No Python. No change to the exported JSON format (buildTheme output unchanged).
 

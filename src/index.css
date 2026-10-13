@@ -2,7 +2,7 @@
 
 /* Chrome tokens only. The preview uses the pi role colors passed in as props, never these. */
 @theme {
-  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: Arial, Helvetica, sans-serif;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
     monospace;
@@ -12,7 +12,9 @@
   --color-ink: light-dark(#202020, #ededed);
   --color-muted: light-dark(#717171, #9b9b9b);
   --color-line: light-dark(#d7d7d4, #454545);
-  --color-divider: light-dark(#ededed, #292929);
+  --color-subtle: light-dark(#ededeb, #2d2d2d);
+  /* Same in both modes. */
+  --color-hover-ring: #f0f0f0;
   --color-danger: #e5484d;
 }
 
@@ -20,7 +22,46 @@
   color-scheme: light dark;
 }
 
+body {
+  background-color: light-dark(#fff, #101010);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;
+}
+
+/* Measured from the reference UI. */
+.panel-heading {
+  display: flex;
+  height: 2.25rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.375;
+  letter-spacing: -0.02em;
+}
+
+.token-row {
+  display: grid;
+  min-height: 30px;
+  grid-template-columns: max-content minmax(12px, 1fr) minmax(0, max-content);
+  align-items: center;
+  gap: 1rem;
+  font-size: 12px;
+}
+
+.preview-surface {
+  border-radius: 2px;
+  box-shadow: 0 0 1px 0.5px #7070703d;
+}
+
+@media (prefers-color-scheme: dark) {
+  .preview-surface {
+    box-shadow: 0 0 1px 0.5px #8080803d;
+  }
 }

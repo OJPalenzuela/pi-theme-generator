@@ -13,6 +13,8 @@ import {
   fromJson,
   validate,
   scale,
+  paletteScales,
+  resolveRef,
   deriveRoles,
   mergeTheme,
   fileName,
@@ -116,9 +118,52 @@ test("scale keeps the base at step 200 and runs light to dark", () => {
     assert.ok(sum(s[STEPS[i - 1]]) > sum(s[STEPS[i]]), `${STEPS[i]}`);
 });
 
+// Expected values are the default dark hue rows, pinned so the math cannot drift.
+test("scale reproduces the default dark red row", () => {
+  assert.deepEqual(scale("#e06c75"), {
+    100: "#fd7e87",
+    200: "#e06c75",
+    300: "#c35a63",
+    400: "#a74952",
+    500: "#8c3941",
+    600: "#722931",
+    700: "#591921",
+    800: "#410a13",
+    900: "#280207",
+  });
+});
+
+test("paletteScales builds gray from text and background anchors", () => {
+  assert.deepEqual(paletteScales(DEFAULT_PALETTE.bases).gray, {
+    100: "#ffffff",
+    200: "#eeeeee",
+    300: "#b5b5b5",
+    400: "#808080",
+    500: "#4c4c4c",
+    600: "#1e1e1e",
+    700: "#141414",
+    800: "#0a0a0a",
+    900: "#030303",
+  });
+});
+
+test("paletteScales applies a step override and keeps the other steps", () => {
+  const generated = paletteScales(DEFAULT_PALETTE.bases);
+  const scales = paletteScales(DEFAULT_PALETTE.bases, { "red.300": "#123456" });
+  assert.equal(scales.red[300], "#123456");
+  assert.equal(scales.red[400], generated.red[400]);
+});
+
 test("deriveRoles fills all 56 roles with valid hex from the default palette", () => {
   const colors = deriveRoles(DEFAULT_PALETTE);
   assert.deepEqual(validate(colors), []);
+});
+
+test("resolveRef reads a hue step directly and a token step through its hue", () => {
+  const scales = paletteScales(DEFAULT_PALETTE.bases);
+  const tokens = { ...DEFAULT_PALETTE.tokens, accent: "red" };
+  assert.equal(resolveRef("gray.200", scales, tokens), scales.gray[200]);
+  assert.equal(resolveRef("accent.300", scales, tokens), scales.red[300]);
 });
 
 test("deriveRoles follows a token to the hue it is set to", () => {
@@ -146,7 +191,7 @@ test("mergeTheme applies valid hex lowercased and keeps what the theme leaves ou
 
 test("fileName slugs the theme name and falls back to theme", () => {
   assert.equal(fileName("My Theme!"), "my-theme.json");
-  assert.equal(fileName("opencode"), "opencode.json");
+  assert.equal(fileName("default"), "default.json");
   assert.equal(fileName("  "), "theme.json");
 });
 

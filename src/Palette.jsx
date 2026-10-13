@@ -1,52 +1,68 @@
-import { HUES, TOKENS, STEPS, scale } from "./theme.js";
-import ColorField from "./ColorField.jsx";
-
-// The nine generated steps of one hue, lightest first.
-function Strip({ base }) {
-  const colors = scale(base);
-  return (
-    <span className="flex gap-0.5">
-      {STEPS.map((step) => (
-        <span
-          key={step}
-          className="size-3.5 rounded-sm border border-line"
-          style={{ background: colors[step] }}
-        />
-      ))}
-    </span>
-  );
-}
+import { TOKENS, STEPS } from "./theme.js";
+import RefSelect from "./RefSelect.jsx";
 
 // Palette only fills roles when asked, so hand-edited roles are never overwritten silently.
-export default function Palette({ bases, tokens, onBase, onToken, onApply }) {
+// Every cell is a color input. Step 200 of a hue is its base; the other steps derive from it unless set by hand.
+export default function Palette({ hues, scales, tokens, onStep, onToken, onAddHue, onApply }) {
+  const hueOptions = hues.map((hue) => ({ value: hue, color: scales[hue][200] }));
   return (
     <>
-      <h2 className="mt-6 mb-2 text-[15px] font-semibold">Hues</h2>
-      <ul>
-        {HUES.map((hue) => (
-          <ColorField key={hue} label={hue} value={bases[hue]} onChange={(hex) => onBase(hue, hex)}>
-            <Strip base={bases[hue]} />
-          </ColorField>
-        ))}
-      </ul>
+      <h2 className="panel-heading">Hues</h2>
+      <div>
+        <div className="grid h-6 grid-cols-[76px_repeat(9,46px)] items-center font-mono text-[11px] text-muted">
+          <span />
+          {STEPS.map((step) => (
+            <span key={step} className="text-center">
+              {step}
+            </span>
+          ))}
+        </div>
+        {hues.map((hue) => {
+          const colors = scales[hue];
+          return (
+            <div key={hue} className="grid h-8 grid-cols-[76px_repeat(9,46px)] items-center">
+              <span className="font-mono text-[11px] font-medium">{hue}</span>
+              {STEPS.map((step) => (
+                <span
+                  key={step}
+                  className="relative h-8 cursor-default hover:z-20 after:pointer-events-none after:absolute after:-inset-px after:border-2 after:border-transparent after:content-[''] hover:after:border-hover-ring"
+                  style={{ background: colors[step] }}
+                >
+                  <input
+                    type="color"
+                    aria-label={`Edit ${hue}.${step}`}
+                    title={colors[step]}
+                    value={colors[step]}
+                    onChange={(event) => onStep(hue, step, event.target.value)}
+                    className="absolute inset-0 size-full cursor-default opacity-0"
+                  />
+                </span>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        onClick={onAddHue}
+        className="mt-2 cursor-pointer text-[12px] text-muted hover:text-ink"
+      >
+        + Add hue
+      </button>
 
-      <h2 className="mt-6 mb-2 text-[15px] font-semibold">Tokens</h2>
+      <h2 className="panel-heading mt-4">Tokens</h2>
       <ul>
         {TOKENS.map((token) => (
-          <li key={token} className="flex min-h-7 items-center gap-2 font-mono text-xs">
+          <li key={token} className="token-row">
             <span className="whitespace-nowrap">{token}</span>
-            <span className="min-w-3 flex-1 border-b border-dotted border-line" />
-            <select
+            <span className="border-b border-dotted border-line" />
+            <RefSelect
+              label={`${token} hue`}
               value={tokens[token]}
-              onChange={(event) => onToken(token, event.target.value)}
-              className="rounded border border-line bg-surface px-1 py-0.5 font-mono text-xs text-ink"
-            >
-              {HUES.map((hue) => (
-                <option key={hue} value={hue}>
-                  {hue}
-                </option>
-              ))}
-            </select>
+              color={scales[tokens[token]][200]}
+              options={hueOptions}
+              onChange={(hue) => onToken(token, hue)}
+            />
           </li>
         ))}
       </ul>
@@ -54,7 +70,7 @@ export default function Palette({ bases, tokens, onBase, onToken, onApply }) {
       <button
         type="button"
         onClick={onApply}
-        className="mt-4 cursor-pointer rounded-md border border-line bg-surface px-3 py-1.5 text-[13px] text-ink hover:bg-action"
+        className="mt-4 cursor-pointer rounded-[2px] bg-action px-3 text-[13px] leading-7 text-ink"
       >
         Apply palette to roles
       </button>
