@@ -1,0 +1,21 @@
+# pi theme generator
+
+> Browser tool to create and export color themes for the pi coding agent.
+
+## About
+
+- pi theme generator is a browser tool that creates and exports color themes for the pi coding agent.
+- It builds a palette and applies it to the 56 pi color roles.
+- The export is a theme JSON file for ~/.pi/agent/themes/.
+
+## Use
+
+- Build a palette.
+- Apply the palette to the 56 color roles.
+- Tweak individual roles.
+- Download the theme JSON.
+
+## Links
+
+- [pi](https://pi.dev): the pi coding agent.
+- [pi themes documentation](https://pi.dev/docs/latest/themes): documentation for pi themes.
