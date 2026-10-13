@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+/* Chrome tokens only. The preview uses the pi role colors passed in as props, never these. */
+@theme {
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+    monospace;
+  --color-canvas: light-dark(#fff, #191919);
+  --color-surface: light-dark(#fff, #242424);
+  --color-action: light-dark(#f0f0ef, #2d2d2d);
+  --color-ink: light-dark(#202020, #ededed);
+  --color-muted: light-dark(#717171, #9b9b9b);
+  --color-line: light-dark(#d7d7d4, #454545);
+  --color-divider: light-dark(#ededed, #292929);
+  --color-danger: #e5484d;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
