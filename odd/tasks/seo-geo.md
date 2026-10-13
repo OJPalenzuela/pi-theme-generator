@@ -23,7 +23,7 @@ T3 | S4 | noscript block | commit 1
 T4 | S5 | favicon | commit 2
 T5 | S6, S7 | robots.txt and llms.txt | commit 3
 T6 | S9 | verify all | no commit; after T5
-T7 | S8 | canonical, og:url, og:image, sitemap | blocked: needs public URL
+T7 | S8 | canonical, og:url, og:image, sitemap | commit 5c3329f (after L7)
 
 ## Log
 
@@ -33,3 +33,4 @@ L3 (decision): no git remote and no LICENSE file in the repo; the public URL is 
 L4 (status 2026-10-13): no task started; T1-T6 pending, T7 blocked. Three subagent launches failed before any edit; `git status` shows only this file. (a) `worker` in background: `@earendil-works/chord` missing in the host install `releases/1.2.0` (present in `1.1.0`). (b) `gentle-ai-worker` in foreground: MCP and `mem_save` tools unavailable to the child. (c) builtin `worker` in foreground: provider `claude-bridge` is registered by a parent extension, and the child does not load its hooks. Owner decision needed: repair the host install so background children start, or allow the needed extension for the worker agent.
 L5 (2026-10-13, verified by parent): host repaired by copying `chord` 1.1.0 into `releases/1.2.0`; background worker then ran. Commits: `b04a140` (T1-T3), `978858d` (T4), `2d92ebf` (T5). Parent checks: S1 description 143 characters; S3 JSON parses and equals S1; `@context` added to the JSON-LD block, which schema.org requires (accepted deviation from S3's list); S4 noscript precedes `#root` with one `<h1>`; S2 has no og:url, og:image or canonical; robots.txt is two lines; S5-S7 files are in `dist/`; `git diff master -- src` is empty; `pnpm build` passes. S9 `vp check` first failed on this file's formatting (blank lines only); fixed with `vp fmt`, content unchanged, and it passes now. Not verified: browser rendering of the noscript block and the favicon. S8 stays deferred until the public URL is known.
 L6 (2026-10-13, user, verbatim): "si, license mit". Added `LICENSE` (MIT, holder OJPalenzuela, 2026) in commit `3583aef` on `feat/seo-geo`; `package.json` already declared MIT.
+L7 (2026-10-13, user, verbatim): "https://pi-theme-generator.vercel.app/". Public URL unblocks S8. Added canonical, `og:url`, `og:image` (`public/og.png`, 1200x630, rendered from HTML in headless Chrome, not committed as a generator), `public/sitemap.xml`, and the `Sitemap:` line in robots.txt. Commit `5c3329f`. Parent checks: `vp check` 0, `pnpm build` 0, `dist/` has og.png, sitemap.xml, and the three tags. Not verified: the live site (it still serves the old `master` build, which has no SEO commits; deploying `feat/seo-geo` needs the user's decision to merge).
