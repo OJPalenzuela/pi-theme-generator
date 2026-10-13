@@ -3,10 +3,45 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>pi theme generator</title>
+    <title>pi theme generator: color themes for the pi coding agent</title>
+    <meta
+      name="description"
+      content="Browser tool to create and export color themes for the pi coding agent. Build a palette, apply it to 56 color roles, and download a theme JSON."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="pi theme generator: color themes for the pi coding agent" />
+    <meta
+      property="og:description"
+      content="Browser tool to create and export color themes for the pi coding agent. Build a palette, apply it to 56 color roles, and download a theme JSON."
+    />
+    <meta property="og:site_name" content="pi theme generator" />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "pi theme generator",
+        "description": "Browser tool to create and export color themes for the pi coding agent. Build a palette, apply it to 56 color roles, and download a theme JSON.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
     <link rel="icon" href="data:," />
   </head>
   <body>
+    <noscript>
+      <h1>pi theme generator</h1>
+      <p>
+        pi theme generator is a browser tool that creates and exports color themes for the pi coding
+        agent. It builds a palette and applies it to the 56 pi color roles. The export is a theme
+        JSON file for ~/.pi/agent/themes/. Learn more at
+        <a href="https://pi.dev">https://pi.dev</a>.
+      </p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="./src/main.jsx"></script>
   </body>
