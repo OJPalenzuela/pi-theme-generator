@@ -1,22 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import useDismiss from "./useDismiss.js";
 
 // Items are { label, hint?, danger?, disabled?, onSelect }. Closes on an outside click or Escape, like RefSelect.
 export default function HeaderMenu({ items }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  useEffect(() => {
-    if (!open) return;
-    const close = (event) => {
-      if (event.type === "keydown" ? event.key === "Escape" : !ref.current.contains(event.target))
-        setOpen(false);
-    };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", close);
-    return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("keydown", close);
-    };
-  }, [open]);
+  useDismiss(ref, open, setOpen);
   return (
     <div ref={ref} className="relative">
       <button

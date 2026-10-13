@@ -355,9 +355,11 @@ function oklchToHex(color) {
 }
 
 // Nine steps from one base: lightness moves toward near-black below 200 and chroma fades with distance from 200.
+// The dark target sits below the base, so very dark bases still get darker steps.
+// shortcut: pure black (lightness 0) has nothing darker to move toward, so its steps stay equal; upgrade if black bases must step.
 export function scale(base) {
   const { L, C, h } = hexToOklch(base);
-  const target = Math.min(0.18, L);
+  const target = Math.min(0.18, L / 2);
   return Object.fromEntries(
     STEPS.map((step) => {
       if (step === 200) return [step, base];

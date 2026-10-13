@@ -1,4 +1,5 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
+import useDismiss from "./useDismiss.js";
 
 // Name with a square of its color. Only the swatch carries color.
 export function Swatch({ color }) {
@@ -16,20 +17,9 @@ export default function RefSelect({ label, value, color, options, onChange }) {
   // The list opens upward near the bottom of the panel, where a downward list would sit below the scroll area.
   const [up, setUp] = useState(false);
   const ref = useRef(null);
-  useEffect(() => {
-    if (!open) return;
-    const close = (event) => {
-      if (!ref.current.contains(event.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, [open]);
+  useDismiss(ref, open, setOpen);
   return (
-    <div
-      ref={ref}
-      className="relative"
-      onKeyDown={(event) => event.key === "Escape" && setOpen(false)}
-    >
+    <div ref={ref} className="relative">
       <button
         type="button"
         aria-label={label}

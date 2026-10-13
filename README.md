@@ -24,7 +24,7 @@ Open the page through Vite. Browsers block ES modules from `file://`.
 - **Theme** switches between themes kept in the page; **New**, **Rename** and **Delete** manage them. Themes live in memory until you reload the page.
 - **Source** shows the theme JSON. **Reset** restores the built-in dark palette in the current theme.
 - **Export** downloads `<name>.json`.
-- **Import** reads a pi theme JSON; `vars` references are resolved to hex.
+- **Import** reads a pi theme JSON into the current theme; `vars` references are resolved to hex. A name another theme already uses is not taken.
 
 ## Notes
 

@@ -21,6 +21,8 @@ import {
 } from "../src/theme.js";
 
 const full = () => Object.fromEntries(ROLES.map((r) => [r, "#102030"]));
+// Sum of the red, green and blue channels: a rough lightness that orders hex colors.
+const sum = (hex) => [1, 3, 5].reduce((n, i) => n + parseInt(hex.slice(i, i + 2), 16), 0);
 
 test("ROLES lists the 56 color roles pi themes use", () => {
   assert.equal(ROLES.length, 56);
@@ -113,7 +115,6 @@ test("scale keeps the base at step 200 and runs light to dark", () => {
   const s = scale("#61afef");
   assert.equal(s[200], "#61afef");
   assert.deepEqual(Object.keys(s).map(Number), STEPS);
-  const sum = (hex) => [1, 3, 5].reduce((n, i) => n + parseInt(hex.slice(i, i + 2), 16), 0);
   for (let i = 1; i < STEPS.length; i++)
     assert.ok(sum(s[STEPS[i - 1]]) > sum(s[STEPS[i]]), `${STEPS[i]}`);
 });
@@ -131,6 +132,16 @@ test("scale reproduces the default dark red row", () => {
     800: "#410a13",
     900: "#280207",
   });
+});
+
+test("scale darkens a very dark base instead of flattening it", () => {
+  const s = scale("#101010");
+  for (let i = 2; i < STEPS.length; i++)
+    assert.ok(sum(s[STEPS[i - 1]]) > sum(s[STEPS[i]]), `${STEPS[i]}`);
+});
+
+test("scale returns valid hex for a saturated base outside sRGB", () => {
+  for (const hex of Object.values(scale("#00ff00"))) assert.match(hex, /^#[0-9a-f]{6}$/);
 });
 
 test("paletteScales builds gray from text and background anchors", () => {

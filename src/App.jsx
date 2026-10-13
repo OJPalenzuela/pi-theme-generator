@@ -4,7 +4,6 @@ import {
   HUES,
   NEW_HUE_BASE,
   DEFAULT_PALETTE,
-  ROLES,
   ROLE_REFS,
   paletteScales,
   refOptions,
@@ -29,7 +28,6 @@ const SECTIONS = [
   ...GROUPS.map(([title, keys]) => [title, keys, true]),
   ["Surfaces", EXPORT_KEYS, false],
 ];
-const ROLE_LINKS = Object.fromEntries(ROLES.map((role) => [role, ROLE_REFS[role]]));
 const BUTTON = "cursor-pointer rounded-[2px] bg-action px-3 text-[13px] leading-7 text-ink";
 const preset = fromJson(presetText);
 const PREVIEW_ROWS = 4;
@@ -127,7 +125,7 @@ export default function App() {
 
   // Links every role to its default reference, so the roles follow the palette from now on.
   function applyPalette() {
-    setLinks(ROLE_LINKS);
+    setLinks(ROLE_REFS);
     setRevision((n) => n + 1);
     setStatus({ message: "Applied palette to roles", bad: false });
   }
@@ -153,7 +151,10 @@ export default function App() {
     // Cleared so picking the same file again still fires change.
     event.target.value = "";
     try {
-      loadTheme(fromJson(await file.text()), `Imported ${file.name}`);
+      const imported = fromJson(await file.text());
+      // A name another theme already uses is not taken, so the list never shows two equal names.
+      if (renameProblem(imported.name, name, names)) imported.name = "";
+      loadTheme(imported, `Imported ${file.name}`);
     } catch (error) {
       setStatus({ message: `Cannot import ${file.name}: ${error.message}`, bad: true });
     }
