@@ -1,0 +1,10 @@
+overrides:
+  # Every vite request (including the plugins' peer) resolves to the Vite+ core.
+  vite@*: npm:@voidzero-dev/vite-plus-core@1.1.0
+  # Pinned: postcss 8.5.30 was published inside pnpm's minimumReleaseAge window.
+  postcss: 8.5.29
+peerDependencyRules:
+  allowAny:
+    - vite
+  allowedVersions:
+    vite: "*"

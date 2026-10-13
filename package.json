@@ -1,0 +1,26 @@
+{
+  "name": "pi-theme-generator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser tool to create and export color themes for the pi coding agent",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "vp test",
+    "start": "vp dev --port 8000",
+    "build": "vp build",
+    "preview": "vp preview --port 8000",
+    "prepare": "vp config"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.2",
+    "tailwindcss": "^4.3.3",
+    "vite-plus": "1.1.0"
+  },
+  "packageManager": "pnpm@12.11.2"
+}
